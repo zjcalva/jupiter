@@ -41,6 +41,7 @@ public class Reflector {
   private Map<String, Invoker> getMethods = new HashMap<String, Invoker>();
   private Map<String, Class<?>> setTypes = new HashMap<String, Class<?>>();
   private Map<String, Class<?>> getTypes = new HashMap<String, Class<?>>();
+  private Map<String,Field> fields = new HashMap<String, Field>();
   private Constructor<?> defaultConstructor;
 
   private Map<String, String> caseInsensitivePropertyMap = new HashMap<String, String>();
@@ -215,6 +216,7 @@ public class Reflector {
         }
       }
       if (field.isAccessible()) {
+    	this.fields.put(field.getName(), field);
         if (!setMethods.containsKey(field.getName())) {
           // issue #379 - removed the check for final because JDK 1.5 allows
           // modification of final fields through reflection (JSR-133). (JGB)
@@ -238,6 +240,7 @@ public class Reflector {
     if (isValidPropertyName(field.getName())) {
       setMethods.put(field.getName(), new SetFieldInvoker(field));
       setTypes.put(field.getName(), field.getType());
+      
     }
   }
 
@@ -436,6 +439,23 @@ public class Reflector {
 
   public String findPropertyName(String name) {
     return caseInsensitivePropertyMap.get(name.toUpperCase(Locale.ENGLISH));
+  }
+  
+  public Field getField(String name){
+	  return fields.get(name);
+  }
+  
+  
+  public Field[] getFields(){
+	  Collection<Field> fieldsInCollection = fields.values();
+	  Field[] fieldArray  = new Field[fieldsInCollection.size()];
+	  Iterator<Field> itor = fieldsInCollection.iterator();
+	  int i = 0;
+	  while( itor.hasNext() ){
+		  Field field = itor.next();
+		  fieldArray[i++] = field;
+	  }
+	  return fieldArray;
   }
 
   /*
